@@ -1,4 +1,6 @@
 // Copyright (c) 2017-present, Rockset, Inc.  All rights reserved.
+#include <aws/core/Aws.h>
+
 #include <cstdio>
 #include <iostream>
 #include <string>
@@ -54,6 +56,7 @@ int main() {
   // create a bucket name for debugging purposes
   const std::string bucketName = bucketPrefix + kBucketSuffix;
 
+  Aws::InitAPI(Aws::SDKOptions());
   // Create a new AWS cloud env Status
   CloudFileSystem* cfs;
   Status s = CloudFileSystemEnv::NewAwsFileSystem(
@@ -128,5 +131,7 @@ int main() {
 
   fprintf(stdout, "Successfully used db at path %s in bucket %s.\n",
           kDBPath.c_str(), bucketName.c_str());
+
+  Aws::ShutdownAPI(Aws::SDKOptions());
   return 0;
 }

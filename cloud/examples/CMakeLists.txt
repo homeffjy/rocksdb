@@ -12,14 +12,14 @@ endif()
 add_executable(cloud_durable_example
         cloud_durable_example.cc)
 target_link_libraries(cloud_durable_example
-        ${ROCKSDB_LIB})
+        ${ROCKSDB_LIB} ${AWSSDK_LINK_LIBRARIES})
 
 add_executable(clone_example
         clone_example.cc)
 target_link_libraries(clone_example
-        ${ROCKSDB_LIB})
+        ${ROCKSDB_LIB} ${AWSSDK_LINK_LIBRARIES})
 
 add_executable(cloud_dump
         cloud_dump.cc)
 target_link_libraries(cloud_dump
-        ${ROCKSDB_LIB})
+        ${ROCKSDB_LIB} ${AWSSDK_LINK_LIBRARIES})
