@@ -601,6 +601,12 @@ class StackableDB : public DB {
 
   virtual Status Resume() override { return db_->Resume(); }
 
+  void NewManifestOnNextUpdate() override { db_->NewManifestOnNextUpdate(); }
+
+  [[nodiscard]] uint64_t GetNextFileNumber() const override {
+    return db_->GetNextFileNumber();
+  }
+
  protected:
   DB* db_;
   std::shared_ptr<DB> shared_db_ptr_;
