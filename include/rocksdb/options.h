@@ -1240,6 +1240,10 @@ struct DBOptions {
   // DEFAULT: true
   bool fail_if_options_file_error = true;
 
+  // If false, we won't use options file.
+  // DEFAULT: true
+  bool use_options_file = true;
+
   // If true, then print malloc stats together with rocksdb.stats
   // when printing to LOG.
   // DEFAULT: false

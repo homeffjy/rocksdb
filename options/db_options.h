@@ -80,6 +80,7 @@ struct ImmutableDBOptions {
   std::shared_ptr<Cache> row_cache;
   WalFilter* wal_filter;
   bool fail_if_options_file_error;
+  bool use_options_file;
   bool dump_malloc_stats;
   bool avoid_flush_during_recovery;
   bool allow_ingest_behind;
