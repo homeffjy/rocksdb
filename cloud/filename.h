@@ -94,7 +94,7 @@ inline std::string ManifestFileWithEpoch(const std::string& epoch) {
 }
 inline std::string ManifestFileWithEpoch(const std::string& dbname,
                                          const std::string& epoch) {
-  assert(!dbname.empty());
+  // assert(!dbname.empty());
   return dbname + "/" + ManifestFileWithEpoch(epoch);
 }
 

@@ -1,5 +1,7 @@
 // Copyright (c) 2017 Rockset
 
+#ifdef USE_AWS
+#include <aws/core/Aws.h>
 #include "rocksdb/cloud/cloud_file_system.h"
 
 #include "cloud/cloud_log_controller_impl.h"
@@ -242,5 +244,9 @@ TEST(CloudFileSystemTest, ConfigureKafkaController) {
 
 int main(int argc, char** argv) {
   ::testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
+  Aws::InitAPI(Aws::SDKOptions());
+  auto r = RUN_ALL_TESTS();
+  Aws::ShutdownAPI(Aws::SDKOptions());
+  return r;
 }
+#endif // USE_AWS
