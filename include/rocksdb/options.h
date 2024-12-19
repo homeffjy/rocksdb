@@ -1466,6 +1466,8 @@ struct DBOptions {
   // inconsistency, e.g. deleted old data become visible again, etc.
   bool enforce_single_del_contracts = true;
 
+  bool disable_delete_obsolete_files_on_open = false;
+
   // EXPERIMENTAL
   // Implementing off-peak duration awareness in RocksDB. In this context,
   // "off-peak time" signifies periods characterized by significantly less read
