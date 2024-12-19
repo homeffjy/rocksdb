@@ -3431,6 +3431,15 @@ class ModelDB : public DB {
     return Status::OK();
   }
 
+  void NewManifestOnNextUpdate() override {
+    throw std::runtime_error("Not implemented");
+  }
+
+  uint64_t GetNextFileNumber() const override {
+    throw std::logic_error("Not implemented");
+    return 0;
+  };
+
   ColumnFamilyHandle* DefaultColumnFamily() const override { return nullptr; }
 
  private:
