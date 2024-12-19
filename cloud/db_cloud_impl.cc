@@ -44,7 +44,7 @@ class ConstantSizeSstFileManager : public SstFileManagerImpl {
     assert(constant_file_size_ >= 0);
   }
 
-  Status OnAddFile(const std::string& file_path) override {
+  Status OnAddFile(const std::string& file_path) {
     return SstFileManagerImpl::OnAddFile(file_path,
                                          uint64_t(constant_file_size_));
   }

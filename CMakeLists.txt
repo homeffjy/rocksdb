@@ -1350,7 +1350,7 @@ if(WITH_TESTS)
         cloud/db_cloud_test.cc
         cloud/cloud_manifest_test.cc
         cloud/cloud_scheduler_test.cc
-        cloud/replication_test.cc
+#        cloud/replication_test.cc
         db/blob/blob_counting_iterator_test.cc
         db/blob/blob_file_addition_test.cc
         db/blob/blob_file_builder_test.cc

@@ -6676,4 +6676,9 @@ void DBImpl::RecordSeqnoToTimeMapping(uint64_t populate_historical_seconds) {
   }
 }
 
+void DBImpl::NewManifestOnNextUpdate() {
+  versions_->NewManifestOnNextUpdate();
+}
+
+
 }  // namespace ROCKSDB_NAMESPACE

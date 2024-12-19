@@ -243,7 +243,7 @@ IOStatus ManifestReader::GetMaxFileNumberFromManifest(FileSystem* fs,
       break;
     }
     uint64_t f;
-    if (edit.GetNextFileNumber(&f)) {
+    if (f = edit.GetNextFile(); f) {
       // Disabled temporarily.
       // TODO: Reenable once the cloud manifest consistency issue is addressed.
       // assert(*maxFileNumber <= f);

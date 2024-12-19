@@ -1098,6 +1098,12 @@ class DBImpl : public DB {
   Status WaitForCompact(
       const WaitForCompactOptions& wait_for_compact_options) override;
 
+  void NewManifestOnNextUpdate() override;
+
+  uint64_t GetNextFileNumber() const override {
+      return versions_->current_next_file_number();
+  }
+
 #ifndef NDEBUG
   // Compact any files in the named level that overlap [*begin, *end]
   Status TEST_CompactRange(int level, const Slice* begin, const Slice* end,
