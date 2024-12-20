@@ -1586,9 +1586,8 @@ IOStatus CloudFileSystemImpl::LoadCloudManifest(const std::string& local_dbname,
     // Create dummy CURRENT file to point to the dummy manifest (cloud env
     // will remap the filename appropriately, this is just to fool the
     // underyling RocksDB)
-    st = SetCurrentFile(WriteOptions(), GetBaseFileSystem().get(), local_dbname,
+    st = SetCurrentFile(GetBaseFileSystem().get(), local_dbname,
                         1 /* descriptor_number */,
-                        Temperature::kUnknown,
                         nullptr /* dir_contains_current_file */);
     if (!st.ok()) {
       Log(InfoLogLevel::ERROR_LEVEL, info_log_,
@@ -2015,9 +2014,9 @@ IOStatus CloudFileSystemImpl::RollNewCookie(
   // MANIFEST file will be cleaned up in DeleteInvisibleFiles().
   auto st = CopyFile(
       base_fs.get(), ManifestFileWithEpoch(local_dbname, old_epoch),
-      Temperature::kUnknown, ManifestFileWithEpoch(local_dbname, delta.epoch),
-      Temperature::kUnknown, 0 /* size */, true /* use_fsync */,
-      nullptr /* io_tracer */);
+      ManifestFileWithEpoch(local_dbname, delta.epoch),
+      0 /* size */, true /* use_fsync */,
+      nullptr /* io_tracer */, Temperature::kUnknown);
   if (!st.ok()) {
     return st;
   }

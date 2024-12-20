@@ -316,7 +316,7 @@ Status DBCloudImpl::CheckpointToCloud(const BucketOptions& destination,
                                       const CheckpointToCloudOptions& options) {
   DisableFileDeletions();
   auto st = DoCheckpointToCloud(destination, options);
-  EnableFileDeletions();
+  EnableFileDeletions(false);
   return st;
 }
 
@@ -339,8 +339,8 @@ Status DBCloudImpl::DoCheckpointToCloud(
   auto manifest_fname = ManifestFileWithEpoch(current_epoch);
   auto tmp_manifest_fname = manifest_fname + ".tmp";
   st = CopyFile(local_fs.get(), GetName() + "/" + manifest_fname,
-                Temperature::kUnknown, GetName() + "/" + tmp_manifest_fname,
-                Temperature::kUnknown, manifest_file_size, false, nullptr);
+                GetName() + "/" + tmp_manifest_fname,
+                manifest_file_size, false, nullptr, Temperature::kUnknown);
   if (!st.ok()) {
     return st;
   }
