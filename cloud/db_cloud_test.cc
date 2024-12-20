@@ -1767,8 +1767,8 @@ TEST_F(CloudTest, CheckpointToCloud) {
 
   auto checkpoint_bucket = cloud_fs_options_.dest_bucket;
 
-  cloud_fs_options_.src_bucket = BucketOptions();
-  cloud_fs_options_.dest_bucket = BucketOptions();
+  // cloud_fs_options_.src_bucket = BucketOptions();
+  // cloud_fs_options_.dest_bucket = BucketOptions();
 
   // Create a DB with two files
   OpenDB();

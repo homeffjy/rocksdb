@@ -169,10 +169,11 @@ void BucketOptions::TEST_Initialize(const std::string& bucket,
 #else
     uid = std::to_string(geteuid());
 #endif
+    std::string random_id = "fahucbiuohkaec"; // avoid same bucket name
     if (EndsWith(bucket, ".")) {
-      SetBucketName(bucket + uid);
+      SetBucketName(bucket + uid + '-' + random_id);
     } else {
-      SetBucketName(bucket + "." + uid);
+      SetBucketName(bucket + "." + uid + '-' + random_id);
     }
   }
   if (object_.empty()) {

@@ -207,7 +207,8 @@ DBImpl::DBImpl(const DBOptions& options, const std::string& dbname,
       bg_flush_scheduled_(0),
       num_running_flushes_(0),
       bg_purge_scheduled_(0),
-      disable_delete_obsolete_files_(0),
+      disable_delete_obsolete_files_(static_cast<int>(
+          immutable_db_options_.disable_delete_obsolete_files_on_open)),
       pending_purge_obsolete_files_(0),
       delete_obsolete_files_last_run_(immutable_db_options_.clock->NowMicros()),
       has_unpersisted_data_(false),
@@ -6676,9 +6677,6 @@ void DBImpl::RecordSeqnoToTimeMapping(uint64_t populate_historical_seconds) {
   }
 }
 
-void DBImpl::NewManifestOnNextUpdate() {
-  versions_->NewManifestOnNextUpdate();
-}
-
+void DBImpl::NewManifestOnNextUpdate() { versions_->NewManifestOnNextUpdate(); }
 
 }  // namespace ROCKSDB_NAMESPACE
