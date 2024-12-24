@@ -127,6 +127,7 @@ const std::string pathsep = "/";
 
 // types of rocksdb files
 const std::string sst = ".sst";
+const std::string blob = ".blob";
 const std::string ldb = ".ldb";
 const std::string log = ".log";
 
@@ -138,6 +139,17 @@ inline bool IsSstFile(const std::string& pathname) {
   const char* ptr = pathname.c_str() + pathname.size() - sst.size();
   if ((memcmp(ptr, sst.c_str(), sst.size()) == 0) ||
       (memcmp(ptr, ldb.c_str(), ldb.size()) == 0)) {
+    return true;
+  }
+  return false;
+}
+
+inline bool IsBlobFile(const std::string& pathname) {
+  if (pathname.size() < blob.size()) {
+    return false;
+  }
+  const char* ptr = pathname.c_str() + pathname.size() - blob.size();
+  if (memcmp(ptr, blob.c_str(), blob.size()) == 0) {
     return true;
   }
   return false;
@@ -200,6 +212,7 @@ inline bool IsCloudManifestFile(const std::string& pathname) {
 
 enum class RocksDBFileType {
   kSstFile,
+  kBlobFile,
   kLogFile,
   kManifestFile,
   kIdentityFile,
@@ -215,6 +228,9 @@ inline RocksDBFileType GetFileType(const std::string& fname_with_epoch) {
   auto fname = RemoveEpoch(fname_with_epoch);
   if (IsSstFile(fname)) {
     return RocksDBFileType::kSstFile;
+  }
+  if (IsBlobFile(fname)) {
+    return RocksDBFileType::kBlobFile;
   }
   if (IsLogFile(fname)) {
     return RocksDBFileType::kLogFile;

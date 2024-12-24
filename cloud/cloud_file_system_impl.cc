@@ -161,6 +161,7 @@ IOStatus CloudFileSystemImpl::NewSequentialFile(
   auto fname = RemapFilename(logical_fname);
   auto file_type = GetFileType(fname);
   bool sstfile = (file_type == RocksDBFileType::kSstFile),
+       blobfile = (file_type == RocksDBFileType::kBlobFile),
        manifest = (file_type == RocksDBFileType::kManifestFile),
        identity = (file_type == RocksDBFileType::kIdentityFile),
        logfile = (file_type == RocksDBFileType::kLogFile);
@@ -170,7 +171,7 @@ IOStatus CloudFileSystemImpl::NewSequentialFile(
     return st;
   }
 
-  if (sstfile || manifest || identity) {
+  if (sstfile || blobfile || manifest || identity) {
     if (cloud_fs_options.keep_local_sst_files || !sstfile) {
       // We read first from local storage and then from cloud storage.
       st = base_fs_->NewSequentialFile(fname, file_opts, result, dbg);
@@ -228,6 +229,7 @@ IOStatus CloudFileSystemImpl::NewRandomAccessFile(
   auto fname = RemapFilename(logical_fname);
   auto file_type = GetFileType(fname);
   bool sstfile = (file_type == RocksDBFileType::kSstFile),
+       blobfile = (file_type == RocksDBFileType::kBlobFile),
        manifest = (file_type == RocksDBFileType::kManifestFile),
        identity = (file_type == RocksDBFileType::kIdentityFile),
        logfile = (file_type == RocksDBFileType::kLogFile);
@@ -239,7 +241,7 @@ IOStatus CloudFileSystemImpl::NewRandomAccessFile(
   }
 
   const IOOptions io_opts;
-  if (sstfile || manifest || identity) {
+  if (sstfile || blobfile || manifest || identity) {
     if (cloud_fs_options.keep_local_sst_files || !sstfile) {
       // Read from local storage and then from cloud storage.
       st = base_fs_->NewRandomAccessFile(fname, file_opts, result, dbg);
@@ -315,12 +317,13 @@ IOStatus CloudFileSystemImpl::NewWritableFile(
   auto fname = RemapFilename(logical_fname);
   auto file_type = GetFileType(fname);
   bool sstfile = (file_type == RocksDBFileType::kSstFile),
+       blobfile = (file_type == RocksDBFileType::kBlobFile),
        manifest = (file_type == RocksDBFileType::kManifestFile),
        identity = (file_type == RocksDBFileType::kIdentityFile),
        logfile = (file_type == RocksDBFileType::kLogFile);
 
   IOStatus s;
-  if (HasDestBucket() && (sstfile || identity || manifest)) {
+  if (HasDestBucket() && (sstfile || blobfile || identity || manifest)) {
     std::unique_ptr<CloudStorageWritableFile> f;
     s = GetStorageProvider()->NewCloudWritableFile(
         fname, GetDestBucketName(), destname(fname), file_opts, &f, dbg);
@@ -380,11 +383,12 @@ IOStatus CloudFileSystemImpl::FileExists(const std::string& logical_fname,
   auto fname = RemapFilename(logical_fname);
   auto file_type = GetFileType(fname);
   bool sstfile = (file_type == RocksDBFileType::kSstFile),
+       blobfile = (file_type == RocksDBFileType::kBlobFile),
        manifest = (file_type == RocksDBFileType::kManifestFile),
        identity = (file_type == RocksDBFileType::kIdentityFile),
        logfile = (file_type == RocksDBFileType::kLogFile);
 
-  if (sstfile || manifest || identity) {
+  if (sstfile || blobfile || manifest || identity) {
     // We read first from local storage and then from cloud storage.
     st = base_fs_->FileExists(fname, io_opts, dbg);
     if (st.IsNotFound()) {
@@ -468,10 +472,11 @@ IOStatus CloudFileSystemImpl::GetFileSize(const std::string& logical_fname,
   auto fname = RemapFilename(logical_fname);
   auto file_type = GetFileType(fname);
   bool sstfile = (file_type == RocksDBFileType::kSstFile),
+       blobfile = (file_type == RocksDBFileType::kBlobFile),
        logfile = (file_type == RocksDBFileType::kLogFile);
 
   IOStatus st;
-  if (sstfile) {
+  if (sstfile || blobfile) {
     if (base_fs_->FileExists(fname, io_opts, dbg).ok()) {
       st = base_fs_->GetFileSize(fname, io_opts, size, dbg);
     } else {
@@ -496,10 +501,11 @@ IOStatus CloudFileSystemImpl::GetFileModificationTime(
   auto fname = RemapFilename(logical_fname);
   auto file_type = GetFileType(fname);
   bool sstfile = (file_type == RocksDBFileType::kSstFile),
+       blobfile = (file_type == RocksDBFileType::kBlobFile),
        logfile = (file_type == RocksDBFileType::kLogFile);
 
   IOStatus st;
-  if (sstfile) {
+  if (sstfile || blobfile) {
     if (base_fs_->FileExists(fname, io_opts, dbg).ok()) {
       st = base_fs_->GetFileModificationTime(fname, io_opts, time, dbg);
     } else {
@@ -696,6 +702,7 @@ IOStatus CloudFileSystemImpl::DeleteFile(const std::string& logical_fname,
   auto fname = RemapFilename(logical_fname);
   auto file_type = GetFileType(fname);
   bool sstfile = (file_type == RocksDBFileType::kSstFile),
+       blobfile = (file_type == RocksDBFileType::kBlobFile),
        manifest = (file_type == RocksDBFileType::kManifestFile),
        identity = (file_type == RocksDBFileType::kIdentityFile),
        logfile = (file_type == RocksDBFileType::kLogFile);
@@ -728,7 +735,7 @@ IOStatus CloudFileSystemImpl::DeleteFile(const std::string& logical_fname,
 
   IOStatus st;
   // Delete from destination bucket and local dir
-  if (sstfile || manifest || identity) {
+  if (sstfile || blobfile || manifest || identity) {
     if (HasDestBucket()) {
       // add the remote file deletion to the queue
       st = DeleteCloudFileFromDest(basename(fname));
@@ -2014,9 +2021,8 @@ IOStatus CloudFileSystemImpl::RollNewCookie(
   // MANIFEST file will be cleaned up in DeleteInvisibleFiles().
   auto st = CopyFile(
       base_fs.get(), ManifestFileWithEpoch(local_dbname, old_epoch),
-      ManifestFileWithEpoch(local_dbname, delta.epoch),
-      0 /* size */, true /* use_fsync */,
-      nullptr /* io_tracer */, Temperature::kUnknown);
+      ManifestFileWithEpoch(local_dbname, delta.epoch), 0 /* size */,
+      true /* use_fsync */, nullptr /* io_tracer */, Temperature::kUnknown);
   if (!st.ok()) {
     return st;
   }
