@@ -981,12 +981,15 @@ bool CloudFileSystemImpl::IsFileInvisible(
     }
 
     return !is_active;
-  } else {
-    auto noepoch = RemoveEpoch(fname);
-    if ((IsSstFile(noepoch) || IsManifestFile(noepoch)) &&
-        (RemapFilename(noepoch) != fname)) {
-      return true;
-    }
+  }
+#ifdef TITAN_MODS_ENABLED
+  if (IsSstFile(fname)) return false;
+#endif
+
+  auto noepoch = RemoveEpoch(fname);
+  if ((IsSstFile(noepoch) || IsManifestFile(noepoch)) &&
+      (RemapFilename(noepoch) != fname)) {
+    return true;
   }
   return false;
 }
@@ -1091,6 +1094,10 @@ std::string CloudFileSystemImpl::srcname(const std::string& localname) {
 //
 std::string CloudFileSystemImpl::destname(const std::string& localname) {
   assert(cloud_fs_options.dest_bucket.IsValid());
+#ifdef TITAN_MODS_ENABLED
+  return cloud_fs_options.dest_bucket.GetObjectPath() + "/" +
+         basename_with_titan(localname);
+#endif
   return cloud_fs_options.dest_bucket.GetObjectPath() + "/" +
          basename(localname);
 }
@@ -2027,8 +2034,15 @@ IOStatus CloudFileSystemImpl::RollNewCookie(
     return st;
   }
 
-  // TODO(igor): Compact cloud manifest by looking at live files in the database
-  // and removing epochs that don't contain any live files.
+#ifdef TITAN_MODS_ENABLED
+  const std::string titandb_name = local_dbname + "/titandb";
+  st = CopyFile(base_fs.get(), ManifestFileWithEpoch(titandb_name, old_epoch),
+                ManifestFileWithEpoch(titandb_name, delta.epoch), 0, true,
+                nullptr, Temperature::kUnknown);
+#endif
+
+  // TODO(igor): Compact cloud manifest by looking at live files in the
+  // database and removing epochs that don't contain any live files.
 
   TEST_SYNC_POINT_CALLBACK(
       "CloudFileSystemImpl::RollNewCookie:AfterManifestCopy", &st);
@@ -2051,6 +2065,13 @@ IOStatus CloudFileSystemImpl::RollNewCookie(
     if (!st.ok()) {
       return st;
     }
+#ifdef TITAN_MODS_ENABLED
+    st = UploadManifest(titandb_name, delta.epoch);
+    if (!st.ok()) {
+      return st;
+    }
+#endif
+
     st = UploadCloudManifest(local_dbname, cookie);
     if (!st.ok()) {
       return st;

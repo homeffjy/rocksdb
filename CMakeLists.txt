@@ -1686,3 +1686,8 @@ option(WITH_BENCHMARK "build benchmark tests" OFF)
 if(WITH_BENCHMARK)
   add_subdirectory(${PROJECT_SOURCE_DIR}/microbench/)
 endif()
+
+option(WITH_TITAN_MODS "build with titan modifications" OFF)
+if (WITH_TITAN_MODS)
+  add_definitions(-DTITAN_MODS_ENABLED)
+endif()

@@ -47,6 +47,15 @@ inline std::string dirname(std::string const& pathname) {
   }
   return pathname.substr(0, pos);
 }
+#ifdef TITAN_MODS_ENABLED
+inline std::string basename_with_titan(const std::string& pathname) {
+  auto result = basename(pathname);
+  if (basename(dirname(pathname)) == "titandb") {
+    result = "titandb/" + result;
+  }
+  return result;
+}
+#endif
 
 // If s doesn't end with '/', it appends it.
 // Special case: if s is empty, we don't append '/'
