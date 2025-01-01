@@ -534,12 +534,13 @@ IOStatus CloudFileSystemImpl::RenameFile(const std::string& logical_src,
   // Get file type of target
   auto file_type = GetFileType(target);
   bool sstfile = (file_type == RocksDBFileType::kSstFile),
+       blobfile = (file_type == RocksDBFileType::kBlobFile),
        manifest = (file_type == RocksDBFileType::kManifestFile),
        identity = (file_type == RocksDBFileType::kIdentityFile),
        logfile = (file_type == RocksDBFileType::kLogFile);
 
   // Rename should never be called on sst files.
-  if (sstfile) {
+  if (sstfile || blobfile) {
     Log(InfoLogLevel::DEBUG_LEVEL, info_log_,
         "[%s] RenameFile source sstfile %s %s is not supported", Name(),
         src.c_str(), target.c_str());
@@ -1094,10 +1095,6 @@ std::string CloudFileSystemImpl::srcname(const std::string& localname) {
 //
 std::string CloudFileSystemImpl::destname(const std::string& localname) {
   assert(cloud_fs_options.dest_bucket.IsValid());
-#ifdef TITAN_MODS_ENABLED
-  return cloud_fs_options.dest_bucket.GetObjectPath() + "/" +
-         basename_with_titan(localname);
-#endif
   return cloud_fs_options.dest_bucket.GetObjectPath() + "/" +
          basename(localname);
 }

@@ -32,14 +32,6 @@ static std::string& rtrim(std::string& s) {
 // trim from both ends
 inline std::string& trim(std::string& s) { return ltrim(rtrim(s)); }
 
-// Extract basename from a full pathname
-inline std::string basename(std::string const& pathname) {
-  auto pos = pathname.rfind('/');
-  if (pos == std::string::npos) {
-    return pathname;
-  }
-  return pathname.substr(pos + 1);
-}
 inline std::string dirname(std::string const& pathname) {
   auto pos = pathname.rfind('/');
   if (pos == std::string::npos) {
@@ -47,15 +39,22 @@ inline std::string dirname(std::string const& pathname) {
   }
   return pathname.substr(0, pos);
 }
-#ifdef TITAN_MODS_ENABLED
-inline std::string basename_with_titan(const std::string& pathname) {
-  auto result = basename(pathname);
-  if (basename(dirname(pathname)) == "titandb") {
-    result = "titandb/" + result;
+
+// Extract basename from a full pathname
+inline std::string basename(std::string const& pathname) {
+  auto pos = pathname.rfind('/');
+  if (pos == std::string::npos) {
+    return pathname;
   }
-  return result;
-}
+#ifdef TITAN_MODS_ENABLED
+  auto dir = dirname(pathname);
+  auto dir_pos = dir.rfind('/');
+  if (dir.substr(dir_pos + 1) == "titandb") {
+    return pathname.substr(dir_pos + 1);
+  }
 #endif
+  return pathname.substr(pos + 1);
+}
 
 // If s doesn't end with '/', it appends it.
 // Special case: if s is empty, we don't append '/'
