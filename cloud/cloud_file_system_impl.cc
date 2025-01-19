@@ -436,16 +436,19 @@ IOStatus CloudFileSystemImpl::GetChildren(const std::string& path,
   }
 
   // Remove all results that are not supposed to be visible.
-  result->erase(
-      std::remove_if(result->begin(), result->end(),
-                     [&](const std::string& f) {
-                       auto noepoch = RemoveEpoch(f);
-                       if (!IsSstFile(noepoch) && !IsManifestFile(noepoch)) {
-                         return false;
-                       }
-                       return RemapFilename(noepoch) != f;
-                     }),
-      result->end());
+  result->erase(std::remove_if(result->begin(), result->end(),
+                               [&](const std::string& f) {
+                                 auto noepoch = RemoveEpoch(f);
+                                 if (
+#ifndef TITAN_MODS_ENABLED
+                                     !IsSstFile(noepoch) &&
+#endif
+                                     !IsManifestFile(noepoch)) {
+                                   return false;
+                                 }
+                                 return RemapFilename(noepoch) != f;
+                               }),
+                result->end());
   // Remove the epoch, remap into RocksDB's domain
   for (size_t i = 0; i < result->size(); ++i) {
     auto noepoch = RemoveEpoch(result->at(i));
@@ -2031,13 +2034,6 @@ IOStatus CloudFileSystemImpl::RollNewCookie(
     return st;
   }
 
-#ifdef TITAN_MODS_ENABLED
-  const std::string titandb_name = local_dbname + "/titandb";
-  st = CopyFile(base_fs.get(), ManifestFileWithEpoch(titandb_name, old_epoch),
-                ManifestFileWithEpoch(titandb_name, delta.epoch), 0, true,
-                nullptr, Temperature::kUnknown);
-#endif
-
   // TODO(igor): Compact cloud manifest by looking at live files in the
   // database and removing epochs that don't contain any live files.
 
@@ -2062,12 +2058,6 @@ IOStatus CloudFileSystemImpl::RollNewCookie(
     if (!st.ok()) {
       return st;
     }
-#ifdef TITAN_MODS_ENABLED
-    st = UploadManifest(titandb_name, delta.epoch);
-    if (!st.ok()) {
-      return st;
-    }
-#endif
 
     st = UploadCloudManifest(local_dbname, cookie);
     if (!st.ok()) {
