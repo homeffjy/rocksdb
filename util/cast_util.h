@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include <cassert>
 #include <initializer_list>
 #include <memory>
 #include <type_traits>

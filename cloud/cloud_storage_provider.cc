@@ -15,6 +15,7 @@
 #include "rocksdb/options.h"
 #include "rocksdb/status.h"
 #include "rocksdb/utilities/object_registry.h"
+#include "util/cast_util.h"
 #include "util/random.h"
 #include "util/string_util.h"
 
@@ -112,7 +113,8 @@ CloudStorageWritableFileImpl::CloudStorageWritableFileImpl(
   auto fname_no_epoch = RemoveEpoch(fname_);
   // Is this a manifest file?
   is_manifest_ = IsManifestFile(fname_no_epoch);
-  assert(IsSstFile(fname_no_epoch) || IsBlobFile(fname_no_epoch) || is_manifest_);
+  assert(IsSstFile(fname_no_epoch) || IsBlobFile(fname_no_epoch) ||
+         is_manifest_);
 
   Log(InfoLogLevel::DEBUG_LEVEL, cfs_->GetLogger(),
       "[%s] CloudWritableFile bucket %s opened local file %s "
@@ -254,7 +256,8 @@ Status CloudStorageProvider::CreateFromString(
 }
 
 Status CloudStorageProviderImpl::PrepareOptions(const ConfigOptions& options) {
-  cfs_ = dynamic_cast<CloudFileSystem*>(options.env->GetFileSystem().get());
+  cfs_ = static_cast_with_check<CloudFileSystem>(
+      options.env->GetFileSystem().get());
   assert(cfs_);
   Status st = CloudStorageProvider::PrepareOptions(options);
   if (!st.ok()) {

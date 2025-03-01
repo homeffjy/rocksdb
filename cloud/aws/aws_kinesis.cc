@@ -11,10 +11,10 @@
 #include "rocksdb/cloud/cloud_file_system.h"
 #include "rocksdb/convenience.h"
 #include "rocksdb/status.h"
+#include "util/cast_util.h"
 #include "util/coding.h"
 #include "util/stderr_logger.h"
 #include "util/string_util.h"
-
 #ifdef USE_AWS
 #include <aws/core/utils/Outcome.h>
 #include <aws/kinesis/KinesisClient.h>
@@ -228,8 +228,8 @@ class KinesisController : public CloudLogControllerImpl {
 };
 
 Status KinesisController::PrepareOptions(const ConfigOptions& config_options) {
-  auto* cfs =
-      dynamic_cast<CloudFileSystem*>(config_options.env->GetFileSystem().get());
+  auto* cfs = static_cast_with_check<CloudFileSystem>(
+      config_options.env->GetFileSystem().get());
   assert(cfs);
 
   Aws::Client::ClientConfiguration config;

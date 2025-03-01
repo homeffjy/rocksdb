@@ -16,6 +16,7 @@
 #include "rocksdb/convenience.h"
 #include "rocksdb/status.h"
 #include "rocksdb/utilities/object_registry.h"
+#include "util/cast_util.h"
 #include "util/coding.h"
 #include "util/stderr_logger.h"
 #include "util/string_util.h"
@@ -38,7 +39,8 @@ Status CloudLogController::CreateFromString(
     controller->reset();
     return Status::OK();
   } else {
-    return ObjectRegistry::NewInstance()->NewSharedObject<CloudLogController>(id, controller);
+    return ObjectRegistry::NewInstance()->NewSharedObject<CloudLogController>(
+        id, controller);
   }
 }
 
@@ -61,7 +63,8 @@ CloudLogControllerImpl::~CloudLogControllerImpl() {
 Status CloudLogControllerImpl::PrepareOptions(const ConfigOptions& options) {
   env_ = options.env;
   assert(env_);
-  cloud_fs_ = dynamic_cast<CloudFileSystem*>(env_->GetFileSystem().get());
+  cloud_fs_ =
+      static_cast_with_check<CloudFileSystem>(env_->GetFileSystem().get());
   assert(cloud_fs_);
   // Create a random number for the cache directory.
   const std::string uid = trim(env_->GenerateUniqueId());

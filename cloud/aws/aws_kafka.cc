@@ -13,6 +13,7 @@
 #include "rocksdb/convenience.h"
 #include "rocksdb/io_status.h"
 #include "rocksdb/status.h"
+#include "util/cast_util.h"
 #include "util/coding.h"
 #include "util/string_util.h"
 
@@ -211,7 +212,6 @@ class KafkaController : public CloudLogControllerImpl {
   Status PrepareOptions(const ConfigOptions& options) override;
 
  protected:
-
  private:
   Status InitializePartitions();
 
@@ -227,8 +227,8 @@ class KafkaController : public CloudLogControllerImpl {
 };
 
 Status KafkaController::PrepareOptions(const ConfigOptions& options) {
-  auto* cfs =
-      dynamic_cast<CloudFileSystem*>(options.env->GetFileSystem().get());
+  auto cfs = static_cast_with_check<CloudFileSystem>(
+      options.env->GetFileSystem().get());
   assert(cfs);
 
   std::string conf_errstr, producer_errstr, consumer_errstr;

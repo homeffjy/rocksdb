@@ -169,7 +169,7 @@ void BucketOptions::TEST_Initialize(const std::string& bucket,
 #else
     uid = std::to_string(geteuid());
 #endif
-    std::string random_id = "fahucbiuohkaec"; // avoid same bucket name
+    std::string random_id = "fahucbiuohkaec";  // avoid same bucket name
     if (EndsWith(bucket, ".")) {
       SetBucketName(bucket + uid + '-' + random_id);
     } else {
@@ -297,7 +297,7 @@ static std::unordered_map<std::string, OptionTypeInfo>
 
 static CloudFileSystemOptions dummy_ceo_options;
 template <typename T1>
-int offset_of(T1 CloudFileSystemOptions::*member) {
+int offset_of(T1 CloudFileSystemOptions::* member) {
   return int(size_t(&(dummy_ceo_options.*member)) - size_t(&dummy_ceo_options));
 }
 
@@ -528,7 +528,7 @@ Status CloudFileSystemEnv::CreateFromString(
   copy.invoke_prepare_options = false;  // Prepare here, not there
   s = ObjectRegistry::NewInstance()->NewUniqueObject<FileSystem>(id, &fs);
   if (s.ok()) {
-    auto* cfs = dynamic_cast<CloudFileSystemImpl*>(fs.get());
+    auto* cfs = static_cast_with_check<CloudFileSystemImpl>(fs.get());
     assert(cfs);
     if (!options.empty()) {
       s = cfs->ConfigureFromMap(copy, options);
@@ -582,7 +582,7 @@ Status CloudFileSystemEnv::CreateFromString(
   copy.invoke_prepare_options = false;  // Prepare here, not there
   s = ObjectRegistry::NewInstance()->NewUniqueObject<FileSystem>(id, &fs);
   if (s.ok()) {
-    auto* cfs = dynamic_cast<CloudFileSystemImpl*>(fs.get());
+    auto cfs = static_cast_with_check<CloudFileSystemImpl>(fs.get());
     assert(cfs);
     auto copts = cfs->GetOptions<CloudFileSystemOptions>();
     *copts = cloud_options;

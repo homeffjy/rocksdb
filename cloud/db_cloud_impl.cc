@@ -96,8 +96,8 @@ Status DBCloud::Open(const Options& opt, const std::string& local_dbname,
     CreateLoggerFromOptions(local_dbname, options, &options.info_log);
   }
 
-  auto* cfs =
-      dynamic_cast<CloudFileSystem*>(options.env->GetFileSystem().get());
+  auto cfs = static_cast_with_check<CloudFileSystem>(
+      options.env->GetFileSystem().get());
   assert(cfs);
   if (!cfs->GetLogger()) {
     cfs->SetLogger(options.info_log);
@@ -239,8 +239,8 @@ Status DBCloudImpl::Savepoint() {
         "Savepoint could not get dbid %s", st.ToString().c_str());
     return st;
   }
-  auto* cfs =
-      dynamic_cast<CloudFileSystemImpl*>(GetEnv()->GetFileSystem().get());
+  auto cfs = static_cast_with_check<CloudFileSystemImpl>(
+      GetEnv()->GetFileSystem().get());
   assert(cfs);
 
   // If there is no destination bucket, then nothing to do
@@ -324,7 +324,8 @@ Status DBCloudImpl::DoCheckpointToCloud(
     const BucketOptions& destination, const CheckpointToCloudOptions& options) {
   std::vector<std::string> live_files;
   uint64_t manifest_file_size{0};
-  auto* cfs = dynamic_cast<CloudFileSystem*>(GetEnv()->GetFileSystem().get());
+  auto* cfs =
+      static_cast_with_check<CloudFileSystem>(GetEnv()->GetFileSystem().get());
   assert(cfs);
   const auto& local_fs = cfs->GetBaseFileSystem();
 
@@ -339,8 +340,8 @@ Status DBCloudImpl::DoCheckpointToCloud(
   auto manifest_fname = ManifestFileWithEpoch(current_epoch);
   auto tmp_manifest_fname = manifest_fname + ".tmp";
   st = CopyFile(local_fs.get(), GetName() + "/" + manifest_fname,
-                GetName() + "/" + tmp_manifest_fname,
-                manifest_file_size, false, nullptr, Temperature::kUnknown);
+                GetName() + "/" + tmp_manifest_fname, manifest_file_size, false,
+                nullptr, Temperature::kUnknown);
   if (!st.ok()) {
     return st;
   }
@@ -450,8 +451,8 @@ Status DBCloudImpl::DoCheckpointToCloud(
 Status DBCloud::ListColumnFamilies(const DBOptions& db_options,
                                    const std::string& name,
                                    std::vector<std::string>* column_families) {
-  auto* cfs =
-      dynamic_cast<CloudFileSystem*>(db_options.env->GetFileSystem().get());
+  auto cfs = static_cast_with_check<CloudFileSystem>(
+      db_options.env->GetFileSystem().get());
   assert(cfs);
 
   cfs->GetBaseFileSystem()->CreateDirIfMissing(name, IOOptions(),

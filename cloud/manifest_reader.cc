@@ -24,7 +24,7 @@ LocalManifestReader::LocalManifestReader(std::shared_ptr<Logger> info_log,
 
 IOStatus LocalManifestReader::GetLiveFilesLocally(
     const std::string& local_dbname, std::set<uint64_t>* list) const {
-  auto* cfs_impl = dynamic_cast<CloudFileSystemImpl*>(cfs_);
+  auto cfs_impl = static_cast_with_check<CloudFileSystemImpl>(cfs_);
   assert(cfs_impl);
   // cloud manifest should be set in CloudFileSystem, and it should map to local
   // CloudManifest
@@ -56,7 +56,7 @@ IOStatus LocalManifestReader::GetLiveFilesLocally(
 
 IOStatus LocalManifestReader::GetManifestLiveFiles(
     const std::string& manifest_file, std::set<uint64_t>* list) const {
-  auto* cfs_impl = dynamic_cast<CloudFileSystemImpl*>(cfs_);
+  auto cfs_impl = static_cast_with_check<CloudFileSystemImpl>(cfs_);
   assert(cfs_impl);
 
   std::unique_ptr<SequentialFileReader> manifest_file_reader;
@@ -167,7 +167,7 @@ IOStatus ManifestReader::GetLiveFiles(const std::string& bucket_path,
   IODebugContext* dbg = nullptr;
   {
     std::unique_ptr<FSSequentialFile> file;
-    auto cfs_impl = dynamic_cast<CloudFileSystemImpl*>(cfs_);
+    auto cfs_impl = static_cast_with_check<CloudFileSystemImpl>(cfs_);
     assert(cfs_impl);
     auto cloudManifestFile = MakeCloudManifestFile(
         bucket_path, cfs_impl->GetCloudFileSystemOptions().cookie_on_open);
