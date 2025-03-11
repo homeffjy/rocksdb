@@ -81,10 +81,12 @@ Status AwsCloudAccessCredentials::CheckCredentials(
 }
 
 void AwsCloudAccessCredentials::InitializeSimple(
-    const std::string& aws_access_key_id, const std::string& aws_secret_key) {
+    const std::string& aws_access_key_id, const std::string& aws_secret_key,
+    const std::string& aws_session_token) {
   type = AwsAccessType::kSimple;
   access_key_id = aws_access_key_id;
   secret_key = aws_secret_key;
+  session_token = aws_session_token;
 }
 
 void AwsCloudAccessCredentials::InitializeConfig(
@@ -120,8 +122,10 @@ Status AwsCloudAccessCredentials::GetCredentialsProvider(
         const char* secret =
             (secret_key.empty() ? getenv("AWS_SECRET_ACCESS_KEY")
                                 : secret_key.c_str());
-        result->reset(
-            new Aws::Auth::SimpleAWSCredentialsProvider(access_key, secret));
+        const char* token = (session_token.empty() ? getenv("AWS_SESSION_TOKEN")
+                                                   : session_token.c_str());
+        result->reset(new Aws::Auth::SimpleAWSCredentialsProvider(
+            access_key, secret, token));
         break;
       }
       case AwsAccessType::kConfig:

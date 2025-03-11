@@ -69,7 +69,8 @@ class AwsCloudAccessCredentials {
   //
   // Initialize AWS credentials using access_key_id and secret_key
   void InitializeSimple(const std::string& aws_access_key_id,
-                        const std::string& aws_secret_key);
+                        const std::string& aws_secret_key,
+                        const std::string& aws_session_token = "");
   // Initialize AWS credentials using a config file
   void InitializeConfig(const std::string& aws_config_file);
 
@@ -87,6 +88,7 @@ class AwsCloudAccessCredentials {
  public:
   std::string access_key_id;
   std::string secret_key;
+  std::string session_token;
   std::string config_file;
   AwsAccessType type{AwsAccessType::kUndefined};
 
