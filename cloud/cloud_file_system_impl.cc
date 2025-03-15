@@ -1682,6 +1682,11 @@ IOStatus CloudFileSystemImpl::SanitizeLocalDirectory(
     if (file.name.find("LOG") == 0) {  // keep LOG files
       continue;
     }
+#ifdef TITAN_MODS_ENABLED
+    if (file.name.find("sst") == 0) {
+      continue;
+    }
+#endif
     std::string pathname = local_name + "/" + file.name;
     bool is_dir;
     st = local_fs->IsDirectory(pathname, io_opts, &is_dir, dbg);
