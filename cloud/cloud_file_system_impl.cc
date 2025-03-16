@@ -570,7 +570,7 @@ IOStatus CloudFileSystemImpl::RenameFile(const std::string& logical_src,
   // Only ID file should come here
   assert(identity);
   assert(HasDestBucket());
-  assert(basename(target) == "IDENTITY");
+  assert(ends_with(basename(target), "IDENTITY"));
 
   // Save Identity to Cloud
   auto st = SaveIdentityToCloud(src, destname(target));
@@ -819,7 +819,7 @@ IOStatus CloudFileSystemImpl::DeleteCloudFileFromDest(
 // Copy my IDENTITY file to cloud storage. Update dbid registry.
 IOStatus CloudFileSystemImpl::SaveIdentityToCloud(const std::string& localfile,
                                                   const std::string& idfile) {
-  assert(basename(idfile) == "IDENTITY");
+  assert(ends_with(basename(idfile), "IDENTITY"));
 
   // Read id into string
   std::string dbid;
